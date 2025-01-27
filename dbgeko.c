@@ -93,7 +93,7 @@ int handle_return_from_wait(pid_t pid, int status) {
         return -2;
     }else if (WIFSTOPPED(status)) {
         int signal = WSTOPSIG(status);
-        procmsg("Child stopped. Signal: %s\n", strsignal(signal));
+        //procmsg("Child stopped. Signal: %s\n", strsignal(signal));
         if (signal == SIGTRAP) {
             struct user_regs_struct regs;
             ptrace(PTRACE_GETREGS, pid, NULL, &regs);
@@ -104,13 +104,16 @@ int handle_return_from_wait(pid_t pid, int status) {
                 procmsg("Hit breakpoint %d at address: %08x. Instruction: %08x\n",i, regs.rip, breakpoints_list->list[i]->orig_data);
                 return i;
             }
-
-            procmsg("EIP: %08x, Instruction: 0x%08x\n", regs.rip, instruction);
+            char *ass;
+            unsigned long long_ins = ptrace(PTRACE_PEEKTEXT, pid, regs.rip, NULL);
+            procmsg("%s\n", ass = disassemble_x32_instruction(long_ins, regs.rip));
+            free(ass);
             return -1;
         }
     } else {
         procmsg("Unexpected signal\n");
         procmsg("Child got a signal: %s\n", strsignal(WSTOPSIG(status)));
+        return -100;
     }
 }
 
@@ -161,6 +164,9 @@ action handle_command(pid_t pid, char *line, int *breakpoint_index) {
         void *addr = (void *)strtol(tokens[1], NULL, 16);
         breakpoint *bp = create_breakpoint(pid, addr);
         add_breakpoint_to_list(breakpoints_list, bp);
+    } else if(strcmp("bl", command) == 0){
+        print_breakpoints(breakpoints_list);
+        return NO_ACTION;
     }
     else{
         printf("Invalid command: %s", command);

@@ -84,3 +84,10 @@ int find_breakpoint_index(list_of_breakpoints *list, void *addr) {
     }
     return -1;
 }
+
+//print list of breakpoints
+void print_breakpoints(list_of_breakpoints *list) {
+    for (int i = 0; i < list->curr_index; i++) {
+        procmsg("Breakpoint %d: 0x%08x\n", i, list->list[i]->addr);
+    }
+}

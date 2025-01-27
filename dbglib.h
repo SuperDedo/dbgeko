@@ -51,6 +51,9 @@ int resume_from_breakpoint(pid_t pid, breakpoint *bp);
 /*find breakpoint index in list by address */
 int find_breakpoint_index(list_of_breakpoints *list, void *addr);
 
+/*print all breakpoints in list */
+void print_breakpoints(list_of_breakpoints *list);
+
 
 
 #endif //DBGEKO_DBGLIB_H
